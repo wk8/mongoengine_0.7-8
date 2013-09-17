@@ -724,7 +724,7 @@ class ReferenceField(BaseField):
     .. versionchanged:: 0.5 added `reverse_delete_rule`
     """
 
-    def __init__(self, document_type, dbref=None,
+    def __init__(self, document_type, dbref=False,
                  reverse_delete_rule=DO_NOTHING, **kwargs):
         """Initialises the Reference Field.
 

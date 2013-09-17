@@ -18,7 +18,7 @@ import pymongo
 from bson import ObjectId
 from bson.dbref import DBRef
 
-ALLOW_INHERITANCE = True
+ALLOW_INHERITANCE = False
 
 _document_registry = {}
 _class_registry = {}
@@ -147,7 +147,7 @@ class BaseField(object):
     name = None
 
     # Fields may have _types inserted into indexes by default
-    _index_with_types = True
+    _index_with_types = False
     _geo_index = False
 
     # These track each time a Field instance is created. Used to retain order.
@@ -1038,10 +1038,9 @@ class BaseDocument(object):
             if value is not None:
                 data[field.db_field] = field.to_mongo(value)
         # Only add _cls and _types if allow_inheritance is not False
-        if not (hasattr(self, '_meta') and
-           self._meta.get('allow_inheritance', ALLOW_INHERITANCE) == False):
+        if hasattr(self, '_meta') and self._meta.get('allow_inheritance', ALLOW_INHERITANCE):
             data['_cls'] = self._class_name
-            data['_types'] = self._superclasses.keys() + [self._class_name]
+            # data['_types'] = self._superclasses.keys() + [self._class_name]
         if '_id' in data and data['_id'] is None:
             del data['_id']
 

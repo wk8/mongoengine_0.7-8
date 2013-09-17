@@ -359,7 +359,7 @@ class QuerySet(object):
         # If inheritance is allowed, only return instances and instances of
         # subclasses of the class being used
         if document._meta.get('allow_inheritance') != False:
-            self._initial_query = {'_types': self._document._class_name}
+            # self._initial_query = {'_types': self._document._class_name}
             self._loaded_fields = QueryFieldList(always_include=['_cls'])
         self._cursor_obj = None
         self._limit = None
@@ -450,7 +450,7 @@ class QuerySet(object):
         background = self._document._meta.get('index_background', False)
         drop_dups = self._document._meta.get('index_drop_dups', False)
         index_opts = self._document._meta.get('index_opts') or {}
-        index_types = self._document._meta.get('index_types', True)
+        index_types = self._document._meta.get('index_types', False)
 
         # determine if an index which we are creating includes
         # _type as its first field; if so, we can avoid creating
@@ -548,7 +548,7 @@ class QuerySet(object):
                 use_types = False
 
         # If _types is being used, prepend it to every specified index
-        index_types = doc_cls._meta.get('index_types', True)
+        index_types = doc_cls._meta.get('index_types', False)
 
         if (spec.get('types', index_types) and use_types
             and direction is not pymongo.GEO2D):
