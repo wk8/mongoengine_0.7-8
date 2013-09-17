@@ -18,7 +18,7 @@ import pymongo
 from bson import ObjectId
 from bson.dbref import DBRef
 
-ALLOW_INHERITANCE = False
+ALLOW_INHERITANCE = True
 
 _document_registry = {}
 _class_registry = {}
@@ -122,11 +122,9 @@ def get_document(name):
     doc = _document_registry.get(name, None)
     if not doc:
         # Possible old style name
-        single_end = name.split('.')[-1]
-        compound_end = '.%s' % single_end
-        possible_match = [k for k in _document_registry.keys()
-                          if k.endswith(compound_end) or k == single_end]
-        if len(possible_match) == 1:
+        end = name.split('.')[-1]
+        possible_match = [k for k in _document_registry.keys() if k == end]
+        if len(possible_match) == 1 and end != name:
             doc = _document_registry.get(possible_match.pop(), None)
     if not doc:
         raise NotRegistered("""
@@ -147,7 +145,7 @@ class BaseField(object):
     name = None
 
     # Fields may have _types inserted into indexes by default
-    _index_with_types = False
+    _index_with_types = True
     _geo_index = False
 
     # These track each time a Field instance is created. Used to retain order.
@@ -1038,9 +1036,10 @@ class BaseDocument(object):
             if value is not None:
                 data[field.db_field] = field.to_mongo(value)
         # Only add _cls and _types if allow_inheritance is not False
-        if hasattr(self, '_meta') and self._meta.get('allow_inheritance', ALLOW_INHERITANCE):
+        if not (hasattr(self, '_meta') and
+           self._meta.get('allow_inheritance', ALLOW_INHERITANCE) == False):
             data['_cls'] = self._class_name
-            # data['_types'] = self._superclasses.keys() + [self._class_name]
+            data['_types'] = self._superclasses.keys() + [self._class_name]
         if '_id' in data and data['_id'] is None:
             del data['_id']
 
